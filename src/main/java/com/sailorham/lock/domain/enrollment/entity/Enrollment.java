@@ -14,6 +14,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -46,6 +47,7 @@ public class Enrollment extends BaseTimeEntity {
 	@JoinColumn(name = "course_id", nullable = false)
 	Course course;
 
+	@Builder
 	public Enrollment(Student student, Course course) {
 		this.student = student;
 		this.course = course;
