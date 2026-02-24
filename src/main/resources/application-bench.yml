@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 50
+      connection-timeout: 5000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+  data:
+    redis:
+      lettuce:
+        pool:
+          max-active: 100
+          max-idle: 50
+          min-idle: 10
+          time-between-eviction-runs: 10000ms
+
+logging:
+  level:
+    root: warn
+    com.sailorham.lock: info
+    org.hibernate.SQL: error
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: metrics, prometheus
