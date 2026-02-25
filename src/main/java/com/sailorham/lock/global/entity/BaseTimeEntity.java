@@ -19,10 +19,10 @@ import lombok.experimental.FieldDefaults;
 public class BaseTimeEntity {
 
 	@CreatedDate
-	@Column(updatable = false)
+	@Column(nullable = false, updatable = false)
 	LocalDateTime createdAt;
 
-	@Column
 	@LastModifiedDate
+	@Column(nullable = false)
 	LocalDateTime updatedAt;
 }
