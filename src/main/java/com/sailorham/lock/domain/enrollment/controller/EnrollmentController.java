@@ -26,10 +26,22 @@ public class EnrollmentController {
 		@Valid @RequestBody EnrollmentRequest request
 	) {
 
-		log.info("수강신청 요청 수신: Student ID={}, Course ID={}", request.studentId(), request.courseId());
+		log.info("[None Lock] 수강신청 요청 수신: Student ID={}, Course ID={}", request.studentId(), request.courseId());
 
 		enrollmentService.enrollCourse(request.studentId(), request.courseId());
 
 		return ResponseEntity.ok("V1: 수강신청 완료 (락 없음)");
+	}
+
+	@PostMapping("/v2/enrollment")
+	public ResponseEntity<String> enrollV2(
+		@Valid @RequestBody EnrollmentRequest request
+	) {
+
+		log.info("[Pessimistic Lock] 수강신청 요청 수신: Student ID={}, Course ID={}", request.studentId(), request.courseId());
+
+		enrollmentService.enrollCourseWithPessimisticLock(request.studentId(), request.courseId());
+
+		return ResponseEntity.ok("V2: 수강신청 완료 (Pessimistic Lock)");
 	}
 }
