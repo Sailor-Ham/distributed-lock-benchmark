@@ -130,7 +130,7 @@ class EnrollmentServiceTest {
 
 		// then
 		Course course = courseRepository.findById(targetCourseId).orElseThrow();
-		System.out.println("[Pessimistic] 최종 수강 인원: " + course.getEnrolledCount());
+		System.out.println("[Pessimistic Lock] 최종 수강 인원: " + course.getEnrolledCount());
 
 		assertThat(course.getEnrolledCount()).isEqualTo(100L);
 	}
