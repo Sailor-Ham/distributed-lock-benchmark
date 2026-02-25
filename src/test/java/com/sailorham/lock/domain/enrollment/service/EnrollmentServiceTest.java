@@ -78,9 +78,11 @@ class EnrollmentServiceTest {
 		ExecutorService executorService = Executors.newFixedThreadPool(32);
 		CountDownLatch latch = new CountDownLatch(threadCount);
 
+		List<Student> students = studentRepository.findAll();
+
 		// when
-		for (int i = 1; i <= threadCount; i++) {
-			final Long studentId = (long)i;
+		for (int i = 0; i < threadCount; i++) {
+			final Long studentId = students.get(i).getId();
 
 			executorService.submit(() -> {
 				try {
@@ -95,8 +97,41 @@ class EnrollmentServiceTest {
 
 		// then
 		Course course = courseRepository.findById(targetCourseId).orElseThrow();
-		System.out.println("최종 수강 인원: " + course.getEnrolledCount());
+		System.out.println("[None Lock] 최종 수강 인원: " + course.getEnrolledCount());
 
 		assertThat(course.getEnrolledCount()).isNotEqualTo(100L);
+	}
+
+	@Test
+	@DisplayName("100명이 동시에 수강신청을 요청할 때 비관적 락을 사용하면 갱신 유실이 발생하지 않습니다.")
+	void enrollCourseWithPessimisticLock_should_success_when_100ConcurrentRequestsWithPessimisticLock() throws InterruptedException {
+
+		// given
+		int threadCount = 100;
+		ExecutorService executorService = Executors.newFixedThreadPool(32);
+		CountDownLatch latch = new CountDownLatch(threadCount);
+
+		List<Student> students = studentRepository.findAll();
+
+		// when
+		for (int i = 0; i < threadCount; i++) {
+			final Long studentId = students.get(i).getId();
+
+			executorService.submit(() -> {
+				try {
+					enrollmentService.enrollCourseWithPessimisticLock(studentId, targetCourseId);
+				} finally {
+					latch.countDown();
+				}
+			});
+		}
+
+		latch.await();
+
+		// then
+		Course course = courseRepository.findById(targetCourseId).orElseThrow();
+		System.out.println("[Pessimistic] 최종 수강 인원: " + course.getEnrolledCount());
+
+		assertThat(course.getEnrolledCount()).isEqualTo(100L);
 	}
 }
