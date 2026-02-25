@@ -43,6 +43,31 @@ public class EnrollmentService {
 			.build();
 		enrollmentRepository.save(enrollment);
 
-		log.info("[EnrollmentService] 수강신청 완료: Student ID={}, Course ID={}", studentId, courseId);
+		log.info("[EnrollmentService] 수강신청 완료 (None Lock: Student ID={}, Course ID={}", studentId, courseId);
+	}
+
+	// V2(Case #1): 비관적 락(Pessimistic Lock)을 적용한 수강신청 로직
+	@Transactional
+	public void enrollCourseWithPessimisticLock(Long studentId, Long courseId) {
+
+		// 학생과 강좌 조회
+		Student student = studentRepository.findById(studentId)
+			.orElseThrow(() -> new IllegalArgumentException("학생이 존재하지 않습니다."));
+
+		// Pessimistic Lock을 이용하여 강좌 조회
+		Course course = courseRepository.findByIdWithPessimisticLock(courseId)
+			.orElseThrow(() -> new IllegalArgumentException("강좌가 존재하지 않습니다."));
+
+		// 수강 정원 검증 및 증가
+		course.enroll();
+
+		// 수강신청 정보 저장
+		Enrollment enrollment = Enrollment.builder()
+			.student(student)
+			.course(course)
+			.build();
+		enrollmentRepository.save(enrollment);
+
+		log.info("[EnrollmentService] 수강신청 완료 (Pessimistic Lock): Student ID={}, Course ID={}", studentId, courseId);
 	}
 }
